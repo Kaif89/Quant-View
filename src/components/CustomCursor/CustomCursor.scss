@@ -1,0 +1,38 @@
+
+html,
+body,
+* {
+  cursor: none !important;
+}
+
+.big-ball,
+.small-ball {
+  position: fixed;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  z-index: 1000;
+  border-radius: 50%;
+  svg {
+    circle {
+      fill: #f7f8fa;
+    }
+  }
+}
+
+.big-ball {
+  width: 30px;
+  height: 30px;
+  mix-blend-mode: difference;
+}
+
+.small-ball {
+  width: 10px;
+  height: 10px;
+  mix-blend-mode: normal;
+  svg {
+    circle {
+      fill: hsl(var(--foreground));
+    }
+  }
+}
