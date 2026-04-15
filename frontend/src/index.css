@@ -1,0 +1,378 @@
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+@font-face {
+  font-family: 'PP Neue Montreal';
+  src: url('https://cdn.prod.website-files.com/6970e322402e42d73de5bf10/6970e3b8dc8d6b29a077860d_PPNeueMontreal-Medium.woff2') format('woff2');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'PP Neue Montreal';
+  src: url('https://cdn.prod.website-files.com/6970e322402e42d73de5bf10/6970e3b97b10a2fdbfef0af1_PPNeueMontreal-Book.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+
+  /* Light mode = clean fintech SaaS aesthetic */
+  :root {
+    --background: 0 0% 98%;
+    --foreground: 0 0% 4%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 4%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 4%;
+
+    --primary: 0 0% 9%;
+    --primary-foreground: 0 0% 98%;
+
+    --secondary: 0 0% 96%;
+    --secondary-foreground: 0 0% 9%;
+
+    --muted: 0 0% 96%;
+    --muted-foreground: 0 0% 45%;
+
+    --accent: 0 0% 92%;
+    --accent-foreground: 0 0% 9%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 0 0% 88%;
+    --input: 0 0% 88%;
+    --ring: 0 0% 4%;
+
+    --radius: 0;
+
+    --chart-up: 0 0% 40%;
+    --chart-down: 0 0% 20%;
+    --chart-line: 0 0% 4%;
+    --chart-prediction: 0 0% 60%;
+
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 0 0% 25%;
+    --sidebar-primary: 0 0% 9%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 0 0% 92%;
+    --sidebar-accent-foreground: 0 0% 9%;
+    --sidebar-border: 0 0% 90%;
+    --sidebar-ring: 0 0% 4%;
+
+    --kpi-positive: 160 84% 39%;
+    --kpi-negative: 0 84% 60%;
+    --kpi-warning: 38 92% 50%;
+    --glow-primary: 0 0% 9%;
+
+    font-family: 'PP Neue Montreal', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* "Dark" mode = full deep-black neon */
+  .dark {
+    --background: 0 0% 4%;
+    --foreground: 0 0% 98%;
+
+    --card: 0 0% 4%;
+    --card-foreground: 0 0% 98%;
+
+    --popover: 0 0% 4%;
+    --popover-foreground: 0 0% 98%;
+
+    --primary: 0 0% 98%;
+    --primary-foreground: 0 0% 4%;
+
+    --secondary: 0 0% 8%;
+    --secondary-foreground: 0 0% 98%;
+
+    --muted: 0 0% 12%;
+    --muted-foreground: 0 0% 65%;
+
+    --accent: 0 0% 12%;
+    --accent-foreground: 0 0% 98%;
+
+    --destructive: 0 62% 30%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 0 0% 15%;
+    --input: 0 0% 15%;
+    --ring: 0 0% 83%;
+
+    --chart-line: 0 0% 98%;
+    --chart-up: 0 0% 60%;
+    --chart-down: 0 0% 80%;
+    --chart-prediction: 0 0% 40%;
+
+    --sidebar-background: 0 0% 4%;
+    --sidebar-foreground: 0 0% 62%;
+    --sidebar-primary: 0 0% 98%;
+    --sidebar-primary-foreground: 0 0% 4%;
+    --sidebar-accent: 0 0% 9%;
+    --sidebar-accent-foreground: 0 0% 88%;
+    --sidebar-border: 0 0% 10%;
+    --sidebar-ring: 0 0% 100%;
+
+    --kpi-positive: 160 84% 45%;
+    --kpi-negative: 0 72% 55%;
+    --kpi-warning: 38 92% 55%;
+    --glow-primary: 0 0% 98%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+  }
+
+  .font-mono {
+    font-family: 'JetBrains Mono', monospace;
+  }
+}
+
+@layer components {
+
+  /* Glass card */
+  .glass-card {
+    @apply relative rounded-2xl overflow-hidden;
+    background: hsl(var(--card));
+    border: 1px solid hsl(var(--border));
+    box-shadow: 0 4px 24px -4px hsl(222 35% 15% / 0.08);
+    /* light shadow */
+  }
+
+  .dark .glass-card {
+    box-shadow: 0 4px 24px -4px hsl(0 0% 0% / 0.4);
+    /* dark shadow */
+  }
+
+  /* Glow card variant */
+  .glow-card {
+    @apply glass-card;
+    border-color: hsl(var(--primary) / 0.25);
+  }
+
+  /* KPI Card */
+  .kpi-card {
+    @apply glass-card p-5 flex flex-col gap-2;
+    background: linear-gradient(135deg, hsl(var(--card)) 0%, hsl(var(--secondary) / 0.5) 100%);
+  }
+
+  /* Chart container */
+  .chart-container {
+    @apply relative p-5;
+    background: hsl(var(--card));
+    border: 1px solid hsl(var(--border));
+  }
+
+  /* Stat colours */
+  .stat-positive {
+    @apply text-[hsl(var(--kpi-positive))];
+  }
+
+  .stat-negative {
+    @apply text-[hsl(var(--kpi-negative))];
+  }
+
+  /* Ticker chip */
+  .ticker-chip {
+    @apply inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-secondary/70 text-sm font-medium border border-transparent transition-all duration-200;
+  }
+
+  .dark .ticker-chip {
+    @apply bg-[hsl(224_28%_11%)] border-[hsl(var(--border))];
+  }
+
+  .ticker-chip:hover {
+    @apply border-[hsl(var(--primary)/0.4)] bg-[hsl(var(--primary)/0.08)];
+  }
+
+  /* Time range toggle */
+  .time-toggle {
+    @apply px-3 py-1.5 text-xs font-semibold rounded-lg transition-all duration-200 text-muted-foreground hover:text-foreground;
+  }
+
+  .time-toggle-active {
+    @apply bg-primary text-primary-foreground;
+  }
+
+  /* Badge */
+  .neon-badge {
+    @apply inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold;
+    background: hsl(var(--primary) / 0.12);
+    color: hsl(var(--primary));
+    border: 1px solid hsl(var(--primary) / 0.25);
+  }
+
+  /* Section label */
+  .section-label {
+    @apply text-xs font-semibold uppercase tracking-widest text-muted-foreground;
+  }
+
+  /* Metric value — large monospace number */
+  .metric-value {
+    font-family: 'JetBrains Mono', monospace;
+    @apply text-2xl sm:text-3xl font-semibold text-foreground tracking-tight;
+  }
+
+  /* Signal badges */
+  .signal-buy {
+    @apply text-[10px] px-2.5 py-0.5 rounded-full font-bold uppercase tracking-wider;
+    background: hsl(var(--kpi-positive) / 0.12);
+    color: hsl(var(--kpi-positive));
+    border: 1px solid hsl(var(--kpi-positive) / 0.25);
+  }
+
+  .signal-sell {
+    @apply text-[10px] px-2.5 py-0.5 rounded-full font-bold uppercase tracking-wider;
+    background: hsl(var(--kpi-negative) / 0.12);
+    color: hsl(var(--kpi-negative));
+    border: 1px solid hsl(var(--kpi-negative) / 0.25);
+  }
+
+  .signal-hold {
+    @apply text-[10px] px-2.5 py-0.5 rounded-full font-bold uppercase tracking-wider;
+    background: hsl(var(--kpi-warning) / 0.12);
+    color: hsl(var(--kpi-warning));
+    border: 1px solid hsl(var(--kpi-warning) / 0.25);
+  }
+
+  /* Hide scrollbar globally */
+  * {
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE and Edge */
+  }
+
+  *::-webkit-scrollbar {
+    display: none; /* Chrome, Safari and Opera */
+  }
+}
+
+@layer utilities {
+
+  /* Ticker */
+  .animate-ticker {
+    animation: ticker-scroll 40s linear infinite;
+  }
+
+  @keyframes ticker-scroll {
+    0% {
+      transform: translateX(0);
+    }
+
+    100% {
+      transform: translateX(-50%);
+    }
+  }
+
+  /* Fade in */
+  .animate-fade-in {
+    animation: fade-in 0.5s ease-out both;
+  }
+
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Pulse subtle */
+  .animate-pulse-subtle {
+    animation: pulse-subtle 2.5s ease-in-out infinite;
+  }
+
+  @keyframes pulse-subtle {
+
+    0%,
+    100% {
+      opacity: 1;
+    }
+
+    50% {
+      opacity: 0.65;
+    }
+  }
+
+  /* Glow pulse for live indicator */
+  .animate-glow {
+    animation: glow-pulse 2s ease-in-out infinite;
+  }
+
+  @keyframes glow-pulse {
+
+    0%,
+    100% {
+      box-shadow: 0 0 4px hsl(var(--primary) / 0.6);
+    }
+
+    50% {
+      box-shadow: 0 0 14px hsl(var(--primary) / 0.9), 0 0 28px hsl(var(--primary) / 0.4);
+    }
+  }
+
+  /* Float animation for hero */
+  .animate-float {
+    animation: float 6s ease-in-out infinite;
+  }
+
+  @keyframes float {
+
+    0%,
+    100% {
+      transform: translateY(0px);
+    }
+
+    50% {
+      transform: translateY(-10px);
+    }
+  }
+
+  /* Slide in from left */
+  .animate-slide-in {
+    animation: slide-in 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  @keyframes slide-in {
+    from {
+      opacity: 0;
+      transform: translateX(-16px);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  /* Gradient text */
+  .text-gradient {
+    background: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--accent)) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* Neon glow text */
+  .text-glow {
+    text-shadow: 0 0 20px hsl(var(--primary) / 0.7), 0 0 40px hsl(var(--primary) / 0.4);
+  }
+}
