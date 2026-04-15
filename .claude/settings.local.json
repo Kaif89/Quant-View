@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(chmod +x /home/lutera/.claude/statusline.sh)",
+      "Skill(statusline)"
+    ]
+  }
+}
