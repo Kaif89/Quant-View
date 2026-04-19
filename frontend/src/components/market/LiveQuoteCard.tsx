@@ -13,7 +13,7 @@ export const LiveQuoteCard = memo(function LiveQuoteCard({ quote, historicalPoin
   const { flashProps, key } = usePriceFlash(quote?.price);
 
   if (!quote) return (
-    <div className="w-full h-32 border border-white/10 bg-black/40 flex items-center justify-center text-white/30 font-mono animate-pulse">
+    <div className="w-full h-32 border border-border bg-card flex items-center justify-center text-muted-foreground font-mono animate-pulse">
       Loading Data...
     </div>
   );

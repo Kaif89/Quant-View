@@ -11,23 +11,20 @@ export const SectorHeatmap = memo(function SectorHeatmap() {
   const [hoveredSymbol, setHoveredSymbol] = useState<string | null>(null);
 
   if (!isConnected && quotes.size === 0) {
-    return <div className="h-48 flex items-center justify-center border border-white/10 text-white/40">Waiting for Data...</div>;
+    return <div className="h-48 flex items-center justify-center border border-border rounded-xl text-muted-foreground">Waiting for Data...</div>;
   }
 
-  // Segment US symbols only to avoid messy multi-market mixing
+  // Segment US symbols only
   const usQuotes = Array.from(quotes.values()).filter(q => q.exchange === 'US');
 
-  // Pseudo-blocks layout using Flex wrap mapping % changes to background intensities
   const getColor = (pct: number) => {
-    if (pct > 3) return '#166534'; // dark green
-    if (pct > 0) return '#22c55e'; // green
-    if (pct === 0) return '#525252'; // gray
-    if (pct > -3) return '#ef4444'; // red
-    return '#991b1b'; // dark red
+    if (pct > 3) return '#166534';
+    if (pct > 0) return '#22c55e';
+    if (pct === 0) return '#525252';
+    if (pct > -3) return '#ef4444';
+    return '#991b1b';
   };
 
-  // We assign artificial box sizes just for visualization (since we don't have Market Cap fed natively in this spec)
-  // Usually, area = marketcap
   const getSimulatedWeight = (quote: LiveQuote) => {
      let weight = 1;
      if (['AAPL', 'MSFT', 'NVDA'].includes(quote.symbol)) weight = 4;
@@ -37,7 +34,7 @@ export const SectorHeatmap = memo(function SectorHeatmap() {
   };
 
   return (
-    <div className="w-full flex flex-wrap bg-black border border-white/10 overflow-hidden" 
+    <div className="w-full flex flex-wrap bg-card border border-border rounded-xl overflow-hidden" 
          style={{ height: '400px', alignContent: 'flex-start' }}>
       
       {usQuotes.sort((a,b) => getSimulatedWeight(b) - getSimulatedWeight(a)).map(quote => (
@@ -46,7 +43,7 @@ export const SectorHeatmap = memo(function SectorHeatmap() {
            onMouseEnter={() => setHoveredSymbol(quote.symbol)}
            onMouseLeave={() => setHoveredSymbol(null)}
            whileHover={{ zIndex: 10, scale: 1.05 }}
-           className="relative flex items-center justify-center border border-black/50 transition-colors"
+           className="relative flex items-center justify-center border border-background/50 transition-colors"
            style={{
              flexBasis: `${getSimulatedWeight(quote) * 10}%`,
              height: `${getSimulatedWeight(quote) * 20}%`,
@@ -64,18 +61,18 @@ export const SectorHeatmap = memo(function SectorHeatmap() {
           </div>
 
           {hoveredSymbol === quote.symbol && (
-            <div className="absolute top-0 left-full ml-2 w-32 bg-black border border-white/20 p-2 z-50 text-xs shadow-2xl pointer-events-none">
-               <div className="font-bold text-white mb-1">{quote.symbol}</div>
-               <div className="text-white/60 flex justify-between">Price: <span>${quote.price.toFixed(2)}</span></div>
-               <div className="text-white/60 flex justify-between">Vol:   <span>{quote.volume}</span></div>
+            <div className="absolute top-0 left-full ml-2 w-32 bg-popover border border-border p-2 z-50 text-xs shadow-2xl pointer-events-none rounded-lg">
+               <div className="font-bold text-foreground mb-1">{quote.symbol}</div>
+               <div className="text-muted-foreground flex justify-between">Price: <span className="text-foreground">${quote.price.toFixed(2)}</span></div>
+               <div className="text-muted-foreground flex justify-between">Vol: <span className="text-foreground">{quote.volume}</span></div>
             </div>
           )}
         </motion.div>
       ))}
 
       {usQuotes.length === 0 && (
-        <div className="w-full h-full flex items-center justify-center text-white/30 font-mono text-sm">
-          Awaiting SSE Payload Mapping...
+        <div className="w-full h-full flex items-center justify-center text-muted-foreground font-mono text-sm">
+          Awaiting market data...
         </div>
       )}
     </div>

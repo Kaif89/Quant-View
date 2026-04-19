@@ -6,6 +6,8 @@ export interface OHLCVPoint {
   close: number;
   volume?: number;
   predictedClose?: number;
+  sma20?: number;
+  ema20?: number;
 }
 
 export interface StockMeta {
@@ -14,14 +16,20 @@ export interface StockMeta {
   sector?: string;
 }
 
+export interface StockModel {
+  coefficients: number[];
+  mse: number;
+  mae?: number;
+  r2Score?: number;
+  predictedNext?: number;
+  modelUsed?: string;
+  featureImportances?: Record<string, number>;
+}
+
 export interface StockSeries {
   meta: StockMeta;
   history: OHLCVPoint[];
-  model?: {
-    coefficients: number[];
-    mse: number;
-    predictedNext?: number;
-  };
+  model?: StockModel;
   modelUsed?: string;
 }
 

@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { LiveQuote } from '@/types/market';
+import { API_BASE_URL } from '@/config/apiConfig';
 
 /**
  * Connects to the SSE endpoint to continuously ingest all active LiveQuotes.
@@ -11,7 +12,7 @@ export function useMarketStream() {
   const [lastUpdated, setLastUpdated] = useState<number>(Date.now());
   const retryCount = useRef(0);
   
-  const EVENT_STREAM_URL = 'http://localhost:9090/api/market/stream';
+  const EVENT_STREAM_URL = `${API_BASE_URL}/api/market/stream`;
 
   useEffect(() => {
     let eventSource: EventSource;

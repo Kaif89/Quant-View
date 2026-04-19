@@ -1,6 +1,7 @@
 import { Search } from 'lucide-react';
 import { useState, useRef } from 'react';
 import { useStock } from '@/hooks/useStock';
+import { toast } from 'sonner';
 
 export function SearchBar() {
   const { allStocks, selectTicker } = useStock();
@@ -8,16 +9,38 @@ export function SearchBar() {
   const [open, setOpen] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const filtered = allStocks.filter(
-    (s) =>
-      s.meta.ticker.toLowerCase().includes(query.toLowerCase()) ||
-      (s.meta.name?.toLowerCase().includes(query.toLowerCase()) ?? false)
-  );
+  const filtered = query.length > 0
+    ? allStocks.filter(
+        (s) =>
+          s.meta.ticker.toLowerCase().includes(query.toLowerCase()) ||
+          (s.meta.name?.toLowerCase().includes(query.toLowerCase()) ?? false)
+      )
+    : [];
 
   const handleSelect = (ticker: string) => {
     selectTicker(ticker);
     setQuery('');
     setOpen(false);
+    toast.info(`Loading ${ticker.toUpperCase()}...`);
+  };
+
+  const handleSubmit = () => {
+    const ticker = query.trim().toUpperCase();
+    if (ticker) {
+      handleSelect(ticker);
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      // If there's a filtered match, use the first one; otherwise submit the raw query
+      if (filtered.length > 0) {
+        handleSelect(filtered[0].meta.ticker);
+      } else {
+        handleSubmit();
+      }
+    }
   };
 
   return (
@@ -31,8 +54,9 @@ export function SearchBar() {
           onChange={(e) => { setQuery(e.target.value); setOpen(true); }}
           onFocus={() => setOpen(true)}
           onBlur={() => setTimeout(() => setOpen(false), 200)}
-          placeholder="Search ticker…"
-          className="bg-transparent text-sm text-foreground placeholder:text-muted-foreground outline-none w-full"
+          onKeyDown={handleKeyDown}
+          placeholder="Search any ticker…"
+          className="bg-transparent text-sm text-foreground placeholder:text-muted-foreground outline-none w-full font-mono"
           aria-label="Search stock ticker"
         />
         {query && (
@@ -42,19 +66,38 @@ export function SearchBar() {
       {open && query.length > 0 && (
         <div className="absolute top-full mt-1.5 w-full border border-border rounded-2xl shadow-xl z-50 overflow-hidden"
           style={{ background: 'hsl(var(--popover))', backdropFilter: 'blur(16px)' }}>
-          {filtered.length === 0 ? (
-            <div className="px-4 py-3.5 text-sm text-muted-foreground">No results for "{query}"</div>
+          {filtered.length > 0 ? (
+            <>
+              {filtered.map((s) => (
+                <button
+                  key={s.meta.ticker}
+                  onMouseDown={() => handleSelect(s.meta.ticker)}
+                  className="w-full text-left px-4 py-2.5 text-sm hover:bg-secondary transition-colors flex justify-between items-center group"
+                >
+                  <span className="font-bold text-foreground group-hover:text-primary transition-colors font-mono">{s.meta.ticker}</span>
+                  <span className="text-muted-foreground text-xs">{s.meta.name}</span>
+                </button>
+              ))}
+              <div className="border-t border-border">
+                <button
+                  onMouseDown={handleSubmit}
+                  className="w-full text-left px-4 py-2 text-xs text-muted-foreground hover:bg-secondary transition-colors"
+                >
+                  Press <kbd className="px-1 py-0.5 rounded bg-secondary text-foreground font-mono text-[10px]">Enter</kbd> to search "{query.toUpperCase()}"
+                </button>
+              </div>
+            </>
           ) : (
-            filtered.map((s) => (
+            <div className="px-4 py-3.5 text-sm">
+              <p className="text-muted-foreground mb-1">No preloaded match for "{query}"</p>
               <button
-                key={s.meta.ticker}
-                onMouseDown={() => handleSelect(s.meta.ticker)}
-                className="w-full text-left px-4 py-2.5 text-sm hover:bg-secondary transition-colors flex justify-between items-center group"
+                onMouseDown={handleSubmit}
+                className="text-xs font-medium hover:underline"
+                style={{ color: 'hsl(var(--primary))' }}
               >
-                <span className="font-bold text-foreground group-hover:text-primary transition-colors">{s.meta.ticker}</span>
-                <span className="text-muted-foreground text-xs">{s.meta.name}</span>
+                Search "{query.toUpperCase()}" anyway →
               </button>
-            ))
+            </div>
           )}
         </div>
       )}

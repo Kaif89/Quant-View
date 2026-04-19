@@ -29,7 +29,9 @@ public class StockPredictionDTO {
     private Double priceChange;
     private Double priceChangePercent;
     private Double mse;
+    private Double mae;
     private Double r2Score;
+    private Map<String, Double> feature_importances;
     private List<HistoricalDataPoint> historicalData;
     private Map<String, Double> regressionCoefficients;
     private Integer dataPoints;

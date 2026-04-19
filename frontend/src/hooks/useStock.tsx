@@ -27,7 +27,7 @@ export function StockProvider({ children }: { children: React.ReactNode }) {
   const [showModel, setShowModel] = useState(true);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
 
-  // Background ticker stream (Mock fetcher for the scrolling marquee or fallback)
+  // Background ticker stream
   const { data: allStocks = [] } = useQuery({
     queryKey: ['allTickers'],
     queryFn: () => getAllTickers(),
@@ -67,7 +67,7 @@ export function StockProvider({ children }: { children: React.ReactNode }) {
       return res;
     },
     enabled: showModel && !!stockData,
-    staleTime: 300000, // Predictions cache for 5 minutes
+    staleTime: 300000,
     retry: 0,
     meta: {
       errorMessage: 'Failed to fetch prediction'
@@ -93,7 +93,7 @@ export function StockProvider({ children }: { children: React.ReactNode }) {
     }
   }, [predictionError]);
 
-  // Map predictors back onto the stock data to keep interface identical
+  // Map prediction data onto the stock data
   const selectedStock = React.useMemo(() => {
     if (!stockData) return null;
     
@@ -120,10 +120,15 @@ export function StockProvider({ children }: { children: React.ReactNode }) {
       return {
         ...stockData,
         history: enrichedHistory,
+        modelUsed: predictionData.modelUsed || predictionData.model_used || undefined,
         model: {
           coefficients: [],
           mse: predictionData.mse || 0,
+          mae: predictionData.mae || undefined,
+          r2Score: predictionData.r2Score || predictionData.r2_score || undefined,
           predictedNext: predictionData.next_day_prediction || 0,
+          modelUsed: predictionData.modelUsed || predictionData.model_used || undefined,
+          featureImportances: predictionData.feature_importances || undefined,
         }
       };
     }

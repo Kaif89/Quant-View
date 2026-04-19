@@ -48,9 +48,21 @@ def fetch_batch_quotes(symbols):
             last_row = ticker_df.iloc[-1]
             prev_row = ticker_df.iloc[-2] if len(ticker_df) > 1 else last_row
             
-            # yfinance returns np floats mostly
-            price = float(last_row.get("Close", 0))
-            prev_close = float(prev_row.get("Close", 0))
+            # Extract scalar values safely (pandas 3.0 compat)
+            def safe_float(val, default=0.0):
+                try:
+                    return float(val.iloc[0]) if hasattr(val, 'iloc') else float(val)
+                except (IndexError, TypeError, ValueError):
+                    return default
+
+            def safe_int(val, default=0):
+                try:
+                    return int(val.iloc[0]) if hasattr(val, 'iloc') else int(val)
+                except (IndexError, TypeError, ValueError):
+                    return default
+
+            price = safe_float(last_row.get("Close", 0))
+            prev_close = safe_float(prev_row.get("Close", 0))
             
             # Adjust if same day (fallback)
             if price == 0: price = prev_close
@@ -58,9 +70,9 @@ def fetch_batch_quotes(symbols):
             change = price - prev_close
             change_percent = (change / prev_close) * 100 if prev_close else 0.0
             
-            high = float(last_row.get("High", price))
-            low = float(last_row.get("Low", price))
-            volume = int(last_row.get("Volume", 0))
+            high = safe_float(last_row.get("High", price))
+            low = safe_float(last_row.get("Low", price))
+            volume = safe_int(last_row.get("Volume", 0))
             
             # Form standard Live Quote payload
             quote = {

@@ -1,6 +1,8 @@
 package com.quantview.exception;
 
 import com.quantview.dto.ApiResponse;
+import com.quantview.service.StockService;
+import com.quantview.service.WatchlistService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MissingServletRequestParameterException;
@@ -22,13 +24,38 @@ public class GlobalExceptionHandler {
         return ResponseEntity.badRequest().body(ApiResponse.error("Missing required parameter: " + ex.getParameterName()));
     }
 
+    // StockService custom exceptions
+    @ExceptionHandler(StockService.InvalidTickerException.class)
+    public ResponseEntity<ApiResponse<Void>> handleInvalidTicker(StockService.InvalidTickerException ex) {
+        return ResponseEntity.badRequest().body(ApiResponse.error(ex.getMessage()));
+    }
+
+    @ExceptionHandler(StockService.TickerNotFoundException.class)
+    public ResponseEntity<ApiResponse<Void>> handleTickerNotFound(StockService.TickerNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ApiResponse.error(ex.getMessage()));
+    }
+
+    @ExceptionHandler(StockService.MlEngineUnavailableException.class)
+    public ResponseEntity<ApiResponse<Void>> handleMlUnavailable(StockService.MlEngineUnavailableException ex) {
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(ApiResponse.error(ex.getMessage()));
+    }
+
+    // WatchlistService custom exceptions
+    @ExceptionHandler(WatchlistService.DuplicateTickerException.class)
+    public ResponseEntity<ApiResponse<Void>> handleDuplicateTicker(WatchlistService.DuplicateTickerException ex) {
+        return ResponseEntity.badRequest().body(ApiResponse.error(ex.getMessage()));
+    }
+
+    @ExceptionHandler(WatchlistService.TickerNotInWatchlistException.class)
+    public ResponseEntity<ApiResponse<Void>> handleTickerNotInWatchlist(WatchlistService.TickerNotInWatchlistException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ApiResponse.error(ex.getMessage()));
+    }
+
     @ExceptionHandler(HttpClientErrorException.class)
     public ResponseEntity<ApiResponse<Void>> handleHttpClientError(HttpClientErrorException ex) {
-        // Forward the exact error message from the child service (like Python) if possible
         String body = ex.getResponseBodyAsString();
         String errorMsg = body;
         try {
-            // Attempt to extract 'error' from JSON if it's JSON from Python
             if (body.contains("\"error\"")) {
                 int start = body.indexOf("\"error\"") + 10;
                 int end = body.indexOf("\"", start);

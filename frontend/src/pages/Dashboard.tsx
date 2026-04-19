@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useStock } from '@/hooks/useStock';
+import { useMarketStream } from '@/hooks/useMarketStream';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { SearchBar } from '@/components/layout/SearchBar';
 import { StockChart } from '@/components/charts/StockChart';
@@ -13,6 +14,9 @@ import {
   ArrowUpRight,
   ArrowDownRight,
   Minus,
+  Star,
+  Plus,
+  X,
 } from 'lucide-react';
 
 /* ── helpers ── */
@@ -47,6 +51,7 @@ function signalFromMomentum(delta: number): 'BUY' | 'SELL' | 'HOLD' {
 
 function LiveClock() {
   const [time, setTime] = useState(new Date());
+  const { isConnected } = useMarketStream();
 
   useEffect(() => {
     const id = setInterval(() => setTime(new Date()), 1000);
@@ -60,24 +65,26 @@ function LiveClock() {
     hour12: false,
   });
 
+  const statusColor = isConnected ? 'hsl(var(--kpi-positive))' : 'hsl(var(--kpi-negative))';
+
   return (
     <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full border shrink-0"
       style={{
-        background: 'hsl(var(--kpi-positive) / 0.06)',
-        borderColor: 'hsl(var(--kpi-positive) / 0.2)',
+        background: isConnected ? 'hsl(var(--kpi-positive) / 0.06)' : 'hsl(var(--kpi-negative) / 0.06)',
+        borderColor: isConnected ? 'hsl(var(--kpi-positive) / 0.2)' : 'hsl(var(--kpi-negative) / 0.2)',
       }}>
       <span className="relative flex h-2 w-2">
-        <span className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75"
-          style={{ background: 'hsl(var(--kpi-positive))' }} />
+        <span className={`${isConnected ? 'animate-ping' : ''} absolute inline-flex h-full w-full rounded-full opacity-75`}
+          style={{ background: statusColor }} />
         <span className="relative inline-flex rounded-full h-2 w-2"
-          style={{ background: 'hsl(var(--kpi-positive))' }} />
+          style={{ background: statusColor }} />
       </span>
       <span className="text-[11px] font-semibold tracking-wide font-mono"
-        style={{ color: 'hsl(var(--kpi-positive))' }}>
-        LIVE
+        style={{ color: statusColor }}>
+        {isConnected ? 'LIVE' : 'OFFLINE'}
       </span>
       <span className="text-[11px] font-mono tabular-nums"
-        style={{ color: 'hsl(var(--kpi-positive) / 0.7)' }}>
+        style={{ color: `${statusColor}` }}>
         {formatted}
       </span>
     </div>
@@ -195,10 +202,32 @@ function IndicatorRow({
   );
 }
 
+/* ── Feature Importance Bar ── */
+
+function FeatureImportanceBar({ name, value, maxValue }: { name: string; value: number; maxValue: number }) {
+  const pct = maxValue > 0 ? (value / maxValue) * 100 : 0;
+  return (
+    <div className="flex items-center gap-3 py-1.5">
+      <span className="text-[10px] text-muted-foreground font-mono w-24 truncate text-right">{name}</span>
+      <div className="flex-1 h-2.5 rounded-full overflow-hidden" style={{ background: 'hsl(var(--secondary))' }}>
+        <div
+          className="h-full rounded-full transition-all duration-500"
+          style={{
+            width: `${pct}%`,
+            background: 'hsl(var(--primary))',
+          }}
+        />
+      </div>
+      <span className="text-[10px] font-mono text-muted-foreground w-10 text-right">{(value * 100).toFixed(1)}%</span>
+    </div>
+  );
+}
+
 
 import { LiveQuoteCard } from '@/components/market/LiveQuoteCard';
 import { useLiveQuote } from '@/hooks/useLiveQuote';
 import { LiveQuote } from '@/types/market';
+import { useWatchlist } from '@/hooks/useWatchlist';
 
 function LiveQuoteCardWrapper({ symbol }: { symbol: string }) {
   const { quote, isConnected } = useLiveQuote(symbol);
@@ -227,13 +256,15 @@ function LiveQuoteCardWrapper({ symbol }: { symbol: string }) {
       };
       return <LiveQuoteCard quote={fallbackQuote} />;
     }
-    return <div className="h-full w-full bg-[#0a0a0a] border border-white/10 p-5 font-mono text-white/30 flex items-center justify-center">Awaiting...</div>;
+    return <div className="h-full w-full bg-card border border-border p-5 font-mono text-muted-foreground flex items-center justify-center">Awaiting...</div>;
   }
   return <LiveQuoteCard quote={quote} />;
 }
 
 export default function Dashboard() {
-  const { selectedStock, allStocks, loading, lastUpdated } = useStock();
+  const { selectedStock, allStocks, loading, lastUpdated, selectTicker } = useStock();
+  const { watchlist, addTicker, removeTicker, isLoading: watchlistLoading } = useWatchlist();
+  const [watchlistInput, setWatchlistInput] = useState('');
 
   const today = new Date();
   const formattedDate = today.toLocaleDateString('en-US', {
@@ -261,9 +292,13 @@ export default function Dashboard() {
   const predDelta = latestPrice && prediction ? pctChange(prediction, latestPrice) : null;
 
   const mse = selectedStock?.model?.mse ?? null;
+  const mae = selectedStock?.model?.mae ?? null;
+  const modelUsed = selectedStock?.model?.modelUsed || selectedStock?.modelUsed || null;
+  const featureImportances = selectedStock?.model?.featureImportances ?? null;
 
-  // Compute a simple R²-like score from MSE (heuristic: 1 - MSE/variance)
+  // R² from prediction data or compute heuristic
   const r2 = useMemo(() => {
+    if (selectedStock?.model?.r2Score != null) return selectedStock.model.r2Score;
     if (!selectedStock?.history.length || mse == null) return null;
     const prices = selectedStock.history.map((p) => p.close);
     const mean = prices.reduce((a, b) => a + b, 0) / prices.length;
@@ -317,6 +352,25 @@ export default function Dashboard() {
       currentPrice: prices[len - 1],
     };
   }, [selectedStock]);
+
+  /* ── Feature Importances sorted ── */
+  const sortedFeatures = useMemo(() => {
+    if (!featureImportances) return [];
+    return Object.entries(featureImportances)
+      .sort(([, a], [, b]) => b - a)
+      .slice(0, 8); // top 8
+  }, [featureImportances]);
+
+  const maxImportance = sortedFeatures.length > 0 ? sortedFeatures[0][1] : 0;
+
+  /* ── Watchlist handlers ── */
+  const handleAddWatchlist = () => {
+    const ticker = watchlistInput.trim().toUpperCase();
+    if (ticker) {
+      addTicker(ticker);
+      setWatchlistInput('');
+    }
+  };
 
   /* ── Loading State ── */
 
@@ -411,7 +465,7 @@ export default function Dashboard() {
             subtitle={predDelta != null ? `${predDelta >= 0 ? '↑' : '↓'} ${Math.abs(predDelta).toFixed(2)}% projected` : undefined}
             icon={<Target className="w-4 h-4" />}
             trend={predDelta != null ? (predDelta >= 0 ? 'up' : 'down') : 'neutral'}
-            delay={80}
+            delay={120}
           />
           <KPICard
             label="Model Accuracy"
@@ -419,7 +473,7 @@ export default function Dashboard() {
             subtitle={r2 != null ? (r2 > 0.7 ? 'Strong fit' : r2 > 0.4 ? 'Moderate fit' : 'Weak fit') : undefined}
             icon={<BarChart3 className="w-4 h-4" />}
             trend={r2 != null ? (r2 > 0.7 ? 'up' : r2 > 0.4 ? 'neutral' : 'down') : 'neutral'}
-            delay={160}
+            delay={240}
           />
           <KPICard
             label="MSE"
@@ -427,7 +481,7 @@ export default function Dashboard() {
             subtitle={mse != null ? 'Mean Squared Error' : undefined}
             icon={<TrendingDown className="w-4 h-4" />}
             trend="neutral"
-            delay={240}
+            delay={360}
           />
         </div>
 
@@ -439,7 +493,7 @@ export default function Dashboard() {
           </div>
 
           {/* Signals — 1/3 */}
-          <div className="glass-card p-5 animate-fade-in" style={{ animationDelay: '100ms' }}>
+          <div className="glass-card p-5 animate-fade-in" style={{ animationDelay: '200ms' }}>
             <div className="flex items-center justify-between mb-4">
               <h3 className="section-label">Market Signals</h3>
               <span className="neon-badge text-[10px]">
@@ -473,10 +527,10 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* ── Row 3: Technical Indicators + Volume ── */}
+        {/* ── Row 3: Technical Indicators + Model Insights ── */}
         <div className="grid md:grid-cols-2 gap-4">
           {/* Technical Indicators */}
-          <div className="glass-card p-5 animate-fade-in" style={{ animationDelay: '200ms' }}>
+          <div className="glass-card p-5 animate-fade-in" style={{ animationDelay: '350ms' }}>
             <h3 className="section-label mb-4">Technical Indicators</h3>
             {technicals ? (
               <div>
@@ -510,12 +564,12 @@ export default function Dashboard() {
           </div>
 
           {/* Model Insights */}
-          <div className="glass-card p-5 animate-fade-in" style={{ animationDelay: '300ms' }}>
+          <div className="glass-card p-5 animate-fade-in" style={{ animationDelay: '500ms' }}>
             <h3 className="section-label mb-4">Model Insights</h3>
             {selectedStock ? (
               <div className="space-y-4">
                 {/* Mini stat row */}
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-3 gap-3">
                   <div className="rounded-xl p-3" style={{ background: 'hsl(var(--secondary) / 0.5)' }}>
                     <p className="text-[10px] uppercase tracking-widest text-muted-foreground mb-1">R² Score</p>
                     <p className="font-mono text-lg font-semibold text-foreground">
@@ -528,13 +582,31 @@ export default function Dashboard() {
                       {mse != null ? fmt(mse, 4) : '—'}
                     </p>
                   </div>
+                  <div className="rounded-xl p-3" style={{ background: 'hsl(var(--secondary) / 0.5)' }}>
+                    <p className="text-[10px] uppercase tracking-widest text-muted-foreground mb-1">MAE</p>
+                    <p className="font-mono text-lg font-semibold text-foreground">
+                      {mae != null ? fmt(mae, 4) : '—'}
+                    </p>
+                  </div>
                 </div>
 
-                {/* Model type badge */}
+                {/* Model type badge — dynamic from prediction data */}
                 <div className="flex items-center gap-2">
-                  <span className="neon-badge">Linear Regression</span>
+                  <span className="neon-badge">{modelUsed || 'Awaiting model'}</span>
                   <span className="text-[10px] text-muted-foreground">Active model</span>
                 </div>
+
+                {/* Feature Importances */}
+                {sortedFeatures.length > 0 && (
+                  <div>
+                    <p className="text-[10px] uppercase tracking-widest text-muted-foreground mb-2">Feature Importances</p>
+                    <div className="space-y-0.5">
+                      {sortedFeatures.map(([name, value]) => (
+                        <FeatureImportanceBar key={name} name={name} value={value} maxValue={maxImportance} />
+                      ))}
+                    </div>
+                  </div>
+                )}
 
                 {/* Prediction summary */}
                 {prediction != null && latestPrice != null && (
@@ -570,6 +642,68 @@ export default function Dashboard() {
               </div>
             )}
           </div>
+        </div>
+
+        {/* ── Row 4: Watchlist ── */}
+        <div className="glass-card p-5 animate-fade-in" style={{ animationDelay: '650ms' }}>
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="section-label flex items-center gap-2">
+              <Star className="w-4 h-4" style={{ color: 'hsl(var(--primary))' }} />
+              Watchlist
+            </h3>
+            <span className="neon-badge text-[10px]">{watchlist.length} saved</span>
+          </div>
+
+          {/* Add ticker input */}
+          <div className="flex gap-2 mb-4">
+            <input
+              value={watchlistInput}
+              onChange={(e) => setWatchlistInput(e.target.value.toUpperCase())}
+              onKeyDown={(e) => e.key === 'Enter' && handleAddWatchlist()}
+              placeholder="Add ticker (e.g. AAPL)"
+              className="flex-1 px-3 py-2 text-sm rounded-xl border border-border bg-secondary/50 text-foreground placeholder:text-muted-foreground outline-none focus:border-primary/50 font-mono"
+            />
+            <button
+              onClick={handleAddWatchlist}
+              disabled={!watchlistInput.trim()}
+              className="px-3 py-2 rounded-xl text-sm font-medium transition-colors flex items-center gap-1 disabled:opacity-40"
+              style={{
+                background: 'hsl(var(--primary))',
+                color: 'hsl(var(--primary-foreground))',
+              }}
+            >
+              <Plus className="w-3.5 h-3.5" />
+              Add
+            </button>
+          </div>
+
+          {/* Watchlist items */}
+          {watchlist.length > 0 ? (
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2">
+              {watchlist.map((item: any) => (
+                <button
+                  key={item.ticker}
+                  className="group relative flex items-center justify-between px-3 py-2.5 rounded-xl border border-border/50 hover:border-primary/30 transition-all cursor-pointer"
+                  style={{ background: 'hsl(var(--secondary) / 0.5)' }}
+                  onClick={() => selectTicker(item.ticker)}
+                >
+                  <span className="font-mono text-sm font-bold text-foreground">{item.ticker}</span>
+                  <button
+                    onClick={(e) => { e.stopPropagation(); removeTicker(item.ticker); }}
+                    className="opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-foreground"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                </button>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-6">
+              <Star className="w-8 h-8 text-muted-foreground/20 mx-auto mb-2" />
+              <p className="text-xs text-muted-foreground">No tickers saved yet</p>
+              <p className="text-xs text-muted-foreground/60 mt-1">Add tickers above for quick access</p>
+            </div>
+          )}
         </div>
       </main>
     </div>

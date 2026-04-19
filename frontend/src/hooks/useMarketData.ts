@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { LiveQuote } from '@/types/market';
+import { API_BASE_URL } from '@/config/apiConfig';
 
 /**
  * Standalone REST Market Service wrapper to grab static snapshots of market statuses and quotes.
@@ -15,27 +16,33 @@ export function useMarketData() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const safeJson = async (res: Response) => {
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const text = await res.text();
+    return text ? JSON.parse(text) : null;
+  };
+
   const fetchOverview = async () => {
     try {
       setLoading(true);
       const [allRes, gainRes, loseRes, volRes, statusRes] = await Promise.all([
-        fetch('http://localhost:9090/api/market/quotes'),
-        fetch('http://localhost:9090/api/market/gainers?limit=5'),
-        fetch('http://localhost:9090/api/market/losers?limit=5'),
-        fetch('http://localhost:9090/api/market/volume?limit=5'),
-        fetch('http://localhost:9090/api/market/status'),
+        fetch(`${API_BASE_URL}/api/market/quotes`),
+        fetch(`${API_BASE_URL}/api/market/gainers?limit=5`),
+        fetch(`${API_BASE_URL}/api/market/losers?limit=5`),
+        fetch(`${API_BASE_URL}/api/market/volume?limit=5`),
+        fetch(`${API_BASE_URL}/api/market/status`),
       ]);
 
-      setQuotes(await allRes.json());
-      setGainers(await gainRes.json());
-      setLosers(await loseRes.json());
-      setVolumeLeaders(await volRes.json());
-      setMarketStatus(await statusRes.json());
+      setQuotes(await safeJson(allRes) || []);
+      setGainers(await safeJson(gainRes) || []);
+      setLosers(await safeJson(loseRes) || []);
+      setVolumeLeaders(await safeJson(volRes) || []);
+      setMarketStatus(await safeJson(statusRes) || {});
       
       setError(null);
     } catch (err) {
-      setError('Market Data Retrieval Failed.');
-      console.error(err);
+      setError('Market data unavailable — backend may be offline.');
+      console.warn('[useMarketData] Backend unreachable:', err);
     } finally {
       setLoading(false);
     }

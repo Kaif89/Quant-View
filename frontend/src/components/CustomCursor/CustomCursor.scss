@@ -11,8 +11,10 @@ body,
   top: 0;
   left: 0;
   pointer-events: none;
-  z-index: 1000;
+  z-index: 10000;
   border-radius: 50%;
+  will-change: transform, opacity;
+  transition: opacity 0.2s ease;
   svg {
     circle {
       fill: #f7f8fa;
@@ -24,6 +26,7 @@ body,
   width: 30px;
   height: 30px;
   mix-blend-mode: difference;
+  transition: opacity 0.2s ease;
 }
 
 .small-ball {

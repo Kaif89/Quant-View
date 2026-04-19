@@ -265,7 +265,7 @@
 
   /* Ticker */
   .animate-ticker {
-    animation: ticker-scroll 40s linear infinite;
+    animation: ticker-scroll 80s linear infinite;
   }
 
   @keyframes ticker-scroll {
@@ -280,13 +280,13 @@
 
   /* Fade in */
   .animate-fade-in {
-    animation: fade-in 0.5s ease-out both;
+    animation: fade-in 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
   }
 
   @keyframes fade-in {
     from {
       opacity: 0;
-      transform: translateY(10px);
+      transform: translateY(14px);
     }
 
     to {
@@ -297,7 +297,7 @@
 
   /* Pulse subtle */
   .animate-pulse-subtle {
-    animation: pulse-subtle 2.5s ease-in-out infinite;
+    animation: pulse-subtle 4s ease-in-out infinite;
   }
 
   @keyframes pulse-subtle {
@@ -314,7 +314,7 @@
 
   /* Glow pulse for live indicator */
   .animate-glow {
-    animation: glow-pulse 2s ease-in-out infinite;
+    animation: glow-pulse 3.5s ease-in-out infinite;
   }
 
   @keyframes glow-pulse {
@@ -348,7 +348,7 @@
 
   /* Slide in from left */
   .animate-slide-in {
-    animation: slide-in 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+    animation: slide-in 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
   }
 
   @keyframes slide-in {

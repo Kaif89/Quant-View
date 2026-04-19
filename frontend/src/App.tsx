@@ -18,9 +18,27 @@ import Market from "./pages/Market";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: 1,
+      refetchOnWindowFocus: false,
+    },
+  },
   queryCache: new QueryCache({
-    onError: (error) => {
-      toast.error(`Error: ${error.message}`);
+    onError: (error, query) => {
+      // Use the query's meta errorMessage if provided, otherwise show a clean fallback
+      const message = (query.meta?.errorMessage as string) || 'Something went wrong';
+      
+      // Suppress noisy network/parse errors when backend is simply offline
+      if (error.message?.includes('JSON.parse') || 
+          error.message?.includes('Failed to fetch') ||
+          error.message?.includes('NetworkError') ||
+          error.message?.includes('abort')) {
+        console.warn(`[QuantView] Backend unreachable: ${error.message}`);
+        return; // Don't spam the user with toasts when backend is down
+      }
+      
+      toast.error(message);
     },
   }),
 });

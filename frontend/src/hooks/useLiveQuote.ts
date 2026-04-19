@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { LiveQuote } from '@/types/market';
+import { API_BASE_URL } from '@/config/apiConfig';
 
 /**
  * Specifically subscribes to a singular ticker via SSE. Ideal for the Dashboard and Analytics view.
@@ -17,7 +18,7 @@ export function useLiveQuote(symbol: string) {
     let reconnectTimeout: NodeJS.Timeout;
 
     const connect = () => {
-      eventSource = new EventSource(`http://localhost:9090/api/market/stream/${cleanSymbol}`);
+      eventSource = new EventSource(`${API_BASE_URL}/api/market/stream/${cleanSymbol}`);
 
       eventSource.onopen = () => {
         setIsConnected(true);
