@@ -65,7 +65,7 @@ def train_and_predict(df: pd.DataFrame) -> dict:
     try:
         # ── 1. XGBoost Pipeline ──
         xgb_model = XGBRegressor(
-            n_estimators=200,
+            n_estimators=50,
             max_depth=6,
             learning_rate=0.05,
             subsample=0.8,
@@ -114,7 +114,7 @@ def train_and_predict(df: pd.DataFrame) -> dict:
 
         # Train LSTM
         lstm_model.train()
-        for epoch in range(150):
+        for epoch in range(20):
             optimizer.zero_grad()
             outputs = lstm_model(X_train_lstm)
             loss = criterion(outputs, y_train_lstm)
