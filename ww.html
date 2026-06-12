@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Prompt Enhancer Pro</title>
+
+<style>
+:root {
+    --primary:#3b82f6;
+    --primary-dark:#1d4ed8;
+    --bg:#f1f5f9;
+    --card:#ffffff;
+    --border:#e5e7eb;
+    --text:#0f172a;
+    --muted:#64748b;
+}
+
+body{
+    font-family:'Segoe UI',sans-serif;
+    background:var(--bg);
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    min-height:100vh;
+    padding:20px;
+    color:var(--text);
+}
+
+/* CARD */
+.container{
+    width:min(900px,100%);
+    background:var(--card);
+    padding:30px;
+    border-radius:16px;
+    box-shadow:0 10px 30px rgba(0,0,0,0.08);
+}
+
+/* HEADER */
+h1{
+    text-align:center;
+    margin-bottom:5px;
+}
+.subtitle{
+    text-align:center;
+    color:var(--muted);
+    margin-bottom:20px;
+}
+
+/* CONTROLS */
+.controls-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:10px;
+    margin-bottom:10px;
+}
+
+@media (max-width: 700px){
+    .controls-grid{
+        grid-template-columns:1fr;
+    }
+}
+
+textarea{
+    width:100%;
+    padding:12px;
+    border-radius:10px;
+    border:1px solid var(--border);
+    font-size:14px;
+    resize:none;
+    transition:0.2s;
+}
+
+textarea:focus{
+    border-color:var(--primary);
+    outline:none;
+}
+
+/* SELECT */
+select{
+    width:100%;
+    padding:10px;
+    border-radius:10px;
+    border:1px solid var(--border);
+    background:#fff;
+}
+
+input[type="text"]{
+    width:100%;
+    padding:10px;
+    border-radius:10px;
+    border:1px solid var(--border);
+    margin-bottom:10px;
+    box-sizing:border-box;
+}
+
+textarea{
+    margin-bottom:10px;
+    box-sizing:border-box;
+}
+
+/* BUTTON */
+button{
+    width:100%;
+    padding:12px;
+    border:none;
+    border-radius:10px;
+    background:var(--primary);
+    color:white;
+    font-weight:600;
+    cursor:pointer;
+    transition:0.2s;
+}
+
+button:hover{
+    background:var(--primary-dark);
+}
+
+/* RESULT */
+.result{
+    margin-top:25px;
+}
+
+.result-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:10px;
+}
+
+/* COPY BUTTON */
+.copy-btn{
+    background:white;
+    border:1px solid var(--border);
+    padding:6px 12px;
+    border-radius:8px;
+    cursor:pointer;
+    font-size:13px;
+}
+
+.copy-btn:hover{
+    background:#f8fafc;
+}
+
+.checkbox-wrap{
+    display:flex;
+    gap:16px;
+    margin:10px 0 14px;
+    color:#334155;
+    font-size:14px;
+}
+
+.hint{
+    color:var(--muted);
+    font-size:13px;
+    margin-bottom:10px;
+}
+
+/* OUTPUT */
+.output{
+    background:#f8fafc;
+    padding:15px;
+    border-radius:10px;
+    border:1px solid var(--border);
+    white-space:pre-wrap;
+    font-family:monospace;
+    max-height:300px;
+    overflow:auto;
+}
+
+/* SCORE */
+.score{
+    margin-top:10px;
+    color:#2563eb;
+    font-size:14px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>Prompt Enhancer</h1>
+<p class="subtitle">Turn ideas into AI-agent-ready prompts</p>
+
+<div class="controls-grid">
+    <select id="mode">
+        <option value="general">✨ General</option>
+        <option value="coding">💻 Code Expert</option>
+        <option value="creative">🎨 Creative (Image Prompt)</option>
+        <option value="academic">🎓 Academic (Study)</option>
+    </select>
+    <select id="complexity">
+        <option value="standard">Standard Complexity</option>
+        <option value="advanced">Advanced Complexity</option>
+        <option value="expert">Expert Complexity</option>
+    </select>
+    <select id="audience">
+        <option value="general">General Audience</option>
+        <option value="professional">Professional Audience</option>
+        <option value="expert">Expert Audience</option>
+    </select>
+    <select id="outputStyle">
+        <option value="stepwise">Step-by-step Format</option>
+        <option value="actionable">Action Plan Format</option>
+        <option value="framework">Framework + Checklist</option>
+    </select>
+</div>
+
+<input id="constraints" type="text" placeholder="Optional constraints (e.g., budget under $500, 7-day timeline, beginner level)">
+<p class="hint">Tip: Add specific constraints to get sharper, more realistic prompts.</p>
+
+<div class="checkbox-wrap">
+    <label><input type="checkbox" id="jsonToggle"> JSON Mode</label>
+    <label><input type="checkbox" id="addExamples" checked> Include Examples</label>
+</div>
+
+<textarea id="input" placeholder="Enter your idea..."></textarea>
+
+<button onclick="enhance()">Enhance Prompt</button>
+
+<div class="result" id="resultBox" style="display:none;">
+
+    <div class="result-header">
+        <b>Ready-to-Paste Prompt</b>
+        <button class="copy-btn" onclick="copyText()">Copy</button>
+    </div>
+
+    <div id="output" class="output"></div>
+
+    <div class="score" id="score"></div>
+
+</div>
+
+</div>
+
+<script>
+
+function getRole(mode){
+    return {
+        general:"Senior Strategy Consultant",
+        coding:"Principal Software Engineer & System Designer",
+        creative:"AI Image Prompt Engineer and Visual Concept Director",
+        academic:"Academic Study Coach, Research Methodologist, and Explainer"
+    }[mode];
+}
+
+function getCategoryPack(mode){
+    return {
+        general:{
+            objectives:[
+                "Clarify the user's real goal and success criteria",
+                "Break a broad request into a practical plan",
+                "Highlight risks, assumptions, and alternatives"
+            ],
+            frameworks:["SWOT", "Priority Matrix", "Execution Roadmap", "Risk Register"],
+            outputs:["Executive summary", "Action checklist", "Timeline with milestones"]
+        },
+        coding:{
+            objectives:[
+                "Design robust architecture before coding",
+                "Optimize for maintainability, testing, and performance",
+                "Handle edge cases, failure paths, and observability"
+            ],
+            frameworks:["System Design", "Clean Architecture", "Testing Pyramid", "Security Review"],
+            outputs:["Architecture diagram (textual)", "Implementation plan", "Production-ready code strategy"]
+        },
+        creative:{
+            objectives:[
+                "Convert user ideas into detailed visual prompts for image generation",
+                "Specify composition, lighting, style, lens, mood, and camera behavior",
+                "Generate variants and negative prompts to improve output quality"
+            ],
+            frameworks:["Subject-Environment-Lighting", "Style Layering", "Prompt Weighting", "Negative Prompting"],
+            outputs:["Primary image prompt", "3 improved variations", "Negative prompt block"]
+        },
+        academic:{
+            objectives:[
+                "Turn user topic into a complete study plan",
+                "Explain concepts clearly with memory techniques",
+                "Create revision strategy, practice questions, and progress checkpoints"
+            ],
+            frameworks:["Bloom Taxonomy", "Spaced Repetition", "Active Recall", "Exam Simulation Loop"],
+            outputs:["Study roadmap", "Concept notes", "Revision and test strategy"]
+        }
+    }[mode];
+}
+
+function detectIntent(text){
+    const normalized = text.toLowerCase();
+    if(normalized.includes("website") || normalized.includes("landing page")) return "Web Product Build";
+    if(normalized.includes("app") || normalized.includes("mobile")) return "Application Planning";
+    if(normalized.includes("code") || normalized.includes("api")) return "Software Engineering";
+    if(normalized.includes("story") || normalized.includes("script")) return "Narrative Creation";
+    if(normalized.includes("research") || normalized.includes("paper")) return "Academic Research";
+    return "General Problem Solving";
+}
+
+function getComplexityInstructions(level){
+    const map = {
+        standard:[
+            "Keep scope focused and practical",
+            "Provide concise but complete structure"
+        ],
+        advanced:[
+            "Include trade-off analysis and alternatives",
+            "Add validation criteria for each major step",
+            "Define measurable outcomes"
+        ],
+        expert:[
+            "Add multi-layer strategy (short, medium, long term)",
+            "Include failure mode analysis and mitigation",
+            "Specify quality gates, review checkpoints, and optimization loops",
+            "Use domain-specific terminology where appropriate"
+        ]
+    };
+    return map[level] || map.standard;
+}
+
+function getAudienceInstructions(audience){
+    return {
+        general:"Use clear language and minimal jargon.",
+        professional:"Use business-ready language with clear rationale.",
+        expert:"Use concise expert-level language and assume high baseline knowledge."
+    }[audience];
+}
+
+function getOutputFormat(style){
+    return {
+        stepwise:[
+            "Context and assumptions",
+            "Step-by-step execution plan",
+            "Decision checkpoints",
+            "Final deliverable format"
+        ],
+        actionable:[
+            "Objective",
+            "Priority tasks (P1, P2, P3)",
+            "Execution timeline",
+            "Definition of done"
+        ],
+        framework:[
+            "Framework overview",
+            "Detailed checklist",
+            "Quality review rubric",
+            "Next-iteration improvements"
+        ]
+    }[style];
+}
+
+function calculateScore(prompt, mode, complexity, hasConstraints){
+    let score = Math.min(100, Math.floor(prompt.length / 45));
+    if(mode === "coding" || mode === "academic") score += 10;
+    if(complexity === "advanced") score += 12;
+    if(complexity === "expert") score += 20;
+    if(hasConstraints) score += 8;
+    return Math.min(score, 100);
+}
+
+function getModeSpecificInstruction(mode){
+    const instructions = {
+        general:"Create a practical high-quality prompt that clarifies goals, assumptions, risks, and next steps.",
+        coding:"Create an expert coding prompt with architecture guidance, implementation detail, edge cases, testing strategy, and production constraints.",
+        creative:"Create a premium image-generation prompt with rich visual detail (subject, scene, style, camera, composition, lighting, colors), plus negative prompts and 3 variants.",
+        academic:"Create a study-focused academic prompt that builds a full study plan, concept breakdown, memory methods, practice tasks, and exam revision strategy."
+    };
+    return instructions[mode] || instructions.general;
+}
+
+function toBulletList(items){
+    return items.map(item => - ${item}).join("\n");
+}
+
+function complexityText(level){
+    return {
+        standard:"Keep the response concise and practical.",
+        advanced:"Include alternatives, trade-offs, and implementation detail.",
+        expert:"Provide deep technical/detail-oriented output with edge cases and optimization guidance."
+    }[level] || "Keep the response concise and practical.";
+}
+
+function buildPrompt(input, options){
+    const { mode, complexity, audience, outputStyle, constraints, includeExamples } = options;
+    const intent = detectIntent(input);
+    const audienceRule = getAudienceInstructions(audience);
+    const constraintLine = constraints || "No hard constraints provided.";
+    const complexityRule = complexityText(complexity);
+
+    const baseTail = `
+Requirements:
+- Intent: ${intent}
+- Audience: ${audience}
+- Tone rule: ${audienceRule}
+- Output style: ${outputStyle}
+- Constraints: ${constraintLine}
+- Complexity: ${complexityRule}
+${includeExamples ? "- Include 2 brief examples." : ""}
+`.trim();
+
+    if(mode === "creative"){
+        return `
+Create one FINAL image-generation prompt from this idea:
+"${input}"
+
+Return only the prompt text I can paste directly into an image model.
+
+The prompt must include:
+- subject and scene details
+- composition and camera angle
+- lighting and color palette
+- style references (art style / realism / rendering quality)
+- mood and atmosphere
+- high-detail quality cues (sharp focus, texture, cinematic quality)
+- negative prompt section at the end
+
+${baseTail}
+`.trim();
+    }
+
+    if(mode === "coding"){
+        return `
+Build a complete implementation response for this software request:
+"${input}"
+
+Return a direct execution-ready answer, not a meta explanation.
+
+Include:
+- clear solution approach
+- architecture/components
+- step-by-step implementation
+- production-ready code snippets
+- validation, edge cases, and testing
+- deployment/run instructions
+
+If the request is about a website/app, provide modern UI/UX guidance and a practical file structure.
+
+${baseTail}
+`.trim();
+    }
+
+    if(mode === "academic"){
+        return `
+Create a study-focused academic output for:
+"${input}"
+
+Return a direct student-ready response, not prompt-engineering notes.
+
+Include:
+- simple concept explanation
+- structured study plan (daily/weekly)
+- key terms and memory tricks
+- practice questions with answers
+- revision strategy and self-test checklist
+
+${baseTail}
+`.trim();
+    }
+
+    return `
+Provide a high-quality practical response for:
+"${input}"
+
+Return direct useful output I can use immediately.
+
+Include:
+- concise plan
+- key steps
+- risks and better alternatives
+- final actionable checklist
+
+${baseTail}
+`.trim();
+}
+
+// MAIN
+async function enhance(){
+
+    const input = document.getElementById("input").value;
+    const mode = document.getElementById("mode").value;
+    const complexity = document.getElementById("complexity").value;
+    const audience = document.getElementById("audience").value;
+    const outputStyle = document.getElementById("outputStyle").value;
+    const constraints = document.getElementById("constraints").value.trim();
+    const includeExamples = document.getElementById("addExamples").checked;
+    const jsonMode = document.getElementById("jsonToggle").checked;
+
+    if(!input){
+        alert("Enter something first");
+        return;
+    }
+
+    const prompt = buildPrompt(input,{
+        mode,
+        complexity,
+        audience,
+        outputStyle,
+        constraints,
+        includeExamples
+    });
+
+    const structured = {
+        version:"2.0",
+        source:"local-advanced-generator",
+        role:getRole(mode),
+        category:mode,
+        complexity,
+        audience,
+        output_style:outputStyle,
+        constraints:constraints || null,
+        intent:detectIntent(input),
+        task:input,
+        enhanced_prompt:prompt
+    };
+
+    document.getElementById("resultBox").style.display="block";
+
+    if(jsonMode){
+        document.getElementById("output").innerText =
+            JSON.stringify(structured,null,2);
+    }else{
+        document.getElementById("output").innerText = prompt;
+    }
+
+    document.getElementById("score").innerText =
+        "Prompt Score: " + calculateScore(prompt, mode, complexity, Boolean(constraints)) + "/100";
+}
+
+// MODERN COPY FIX
+function copyText(){
+    const text = document.getElementById("output").innerText;
+
+    navigator.clipboard.writeText(text).then(()=>{
+        alert("Copied to clipboard!");
+    });
+}
+
+</script>
+
+</body>
+</html>
