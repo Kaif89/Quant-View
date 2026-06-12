@@ -93,26 +93,16 @@ export async function getAllTickers(): Promise<StockSeries[]> {
     });
     clearTimeout(timeout);
 
-    const stockPromises = popularTickers.map(async (ticker) => {
+    const results: (StockSeries | null)[] = [];
+    for (const ticker of popularTickers) {
       try {
         const stock = await getStock(ticker);
-        if (!stock) return null;
-        try {
-          const pred = await getPrediction(ticker);
-          stock.model = {
-            ...stock.model,
-            predictedNext: pred.next_day_prediction || pred.predictedPrice || 0,
-          };
-        } catch (e) {
-          // Keep default prediction if ML fails
-        }
-        return stock;
+        results.push(stock);
       } catch (e) {
-        return null;
+        results.push(null);
       }
-    });
-    const stocks = await Promise.all(stockPromises);
-    return stocks.filter((stock): stock is StockSeries => stock !== null);
+    }
+    return results.filter((stock): stock is StockSeries => stock !== null);
 }
 
 /** Watchlist API calls */

@@ -166,7 +166,7 @@ function SignalRow({ ticker, name, signal, change, isLast, onClick }: SignalRowP
           style={{
             color: change >= 0 ? 'hsl(var(--kpi-positive))' : 'hsl(var(--kpi-negative))',
           }}>
-          {change >= 0 ? '+' : ''}{change.toFixed(2)}%
+          {change != null && change >= 0 ? '+' : ''}{change != null ? change.toFixed(2) : '0.00'}%
         </span>
         <span className={badgeClass}>{signal}</span>
       </div>
