@@ -30,9 +30,9 @@ export const LivePriceTicker = memo(function LivePriceTicker() {
         {[...quoteList, ...quoteList].map((quote, idx) => (
           <div key={`${quote.symbol}-${idx}`} className="inline-flex items-center gap-2 px-6 border-r border-border/30 font-mono text-sm text-foreground">
             <span className="font-semibold">{quote.symbol}</span>
-            <span className="text-foreground/80">{quote.price.toFixed(2)}</span>
-            <span className={`text-xs flex items-center ${quote.changePercent >= 0 ? 'text-green-500' : 'text-red-500'}`}>
-              {quote.changePercent >= 0 ? '▲' : '▼'} {Math.abs(quote.changePercent).toFixed(2)}%
+            <span className="text-foreground/80">{(quote.price ?? 0).toFixed(2)}</span>
+            <span className={`text-xs flex items-center ${(quote.changePercent ?? 0) >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+              {(quote.changePercent ?? 0) >= 0 ? '▲' : '▼'} {Math.abs((quote.changePercent ?? 0)).toFixed(2)}%
             </span>
           </div>
         ))}

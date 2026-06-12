@@ -26,10 +26,10 @@ export function TickerStrip() {
               className="ticker-chip shrink-0 cursor-pointer"
             >
               <span className="font-bold text-foreground text-xs">{stock.meta.ticker}</span>
-              <span className="font-mono text-xs text-muted-foreground">${last?.close.toFixed(2)}</span>
+              <span className="font-mono text-xs text-muted-foreground">${(last?.close ?? 0).toFixed(2)}</span>
               <span className={`flex items-center gap-0.5 text-xs font-semibold ${positive ? 'stat-positive' : 'stat-negative'}`}>
                 {positive ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
-                {positive ? '+' : ''}{delta.toFixed(2)}%
+                {positive ? '+' : ''}{(delta ?? 0).toFixed(2)}%
               </span>
             </button>
           );

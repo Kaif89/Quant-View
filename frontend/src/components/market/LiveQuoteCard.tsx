@@ -59,12 +59,12 @@ export const LiveQuoteCard = memo(function LiveQuoteCard({ quote, historicalPoin
               className="text-3xl font-mono font-bold"
             >
               {(quote.currency === "INR" || quote.exchange === "NSE") ? '₹' : '$'}
-              {quote.price.toFixed(2)}
+              {(quote.price ?? 0).toFixed(2)}
             </motion.div>
           </AnimatePresence>
           <div className={`font-mono text-sm flex items-center gap-1 ${colorClass}`}>
-            <span>{isPositive ? '+' : ''}{quote.change.toFixed(2)}</span>
-            <span>({isPositive ? '+' : ''}{quote.changePercent.toFixed(2)}%)</span>
+            <span>{isPositive ? '+' : ''}{(quote.change ?? 0).toFixed(2)}</span>
+            <span>({isPositive ? '+' : ''}{(quote.changePercent ?? 0).toFixed(2)}%)</span>
           </div>
         </div>
 
@@ -94,10 +94,10 @@ export const LiveQuoteCard = memo(function LiveQuoteCard({ quote, historicalPoin
 
       <div className="mt-4 grid grid-cols-2 gap-4 border-t border-border/50 pt-2 text-xs font-mono text-muted-foreground">
         <div className="flex justify-between">
-          <span>HIGH</span> <span className="text-foreground">{quote.dayHigh.toFixed(2)}</span>
+          <span>HIGH</span> <span className="text-foreground">{(quote.dayHigh ?? 0).toFixed(2)}</span>
         </div>
-        <div className="flex justify-between">
-          <span>LOW</span> <span className="text-foreground">{quote.dayLow.toFixed(2)}</span>
+        <div className="flex flex-col border border-border/30 rounded px-2 py-1 bg-background/30">
+          <span>LOW</span> <span className="text-foreground">{(quote.dayLow ?? 0).toFixed(2)}</span>
         </div>
         <div className="flex justify-between col-span-2">
           <span>VOLUME</span> <span className="text-foreground">{fmtVol(quote.volume)}</span>

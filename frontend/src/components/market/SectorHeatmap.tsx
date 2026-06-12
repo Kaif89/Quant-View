@@ -56,14 +56,14 @@ export const SectorHeatmap = memo(function SectorHeatmap() {
               {quote.symbol}
             </div>
             <div className="text-xs font-mono text-white/80">
-               {quote.changePercent > 0 ? '+' : ''}{quote.changePercent.toFixed(2)}%
+               {(quote.changePercent ?? 0) > 0 ? '+' : ''}{(quote.changePercent ?? 0).toFixed(2)}%
             </div>
           </div>
 
           {hoveredSymbol === quote.symbol && (
             <div className="absolute top-0 left-full ml-2 w-32 bg-popover border border-border p-2 z-50 text-xs shadow-2xl pointer-events-none rounded-lg">
                <div className="font-bold text-foreground mb-1">{quote.symbol}</div>
-               <div className="text-muted-foreground flex justify-between">Price: <span className="text-foreground">${quote.price.toFixed(2)}</span></div>
+               <div className="text-muted-foreground flex justify-between">Price: <span className="text-foreground">${(quote.price ?? 0).toFixed(2)}</span></div>
                <div className="text-muted-foreground flex justify-between">Vol: <span className="text-foreground">{quote.volume}</span></div>
             </div>
           )}

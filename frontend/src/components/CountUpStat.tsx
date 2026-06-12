@@ -81,7 +81,7 @@ export function CountUpStat({
     <div ref={containerRef} className="text-left py-4">
       <div className="text-5xl md:text-6xl font-medium tracking-tighter mb-2 font-mono flex items-baseline">
         {prefix && <span className="opacity-50 text-2xl md:text-3xl mr-1">{prefix}</span>}
-        <span>{count.toFixed(decimals)}</span>
+        <span>{(count ?? 0).toFixed(decimals)}</span>
         {suffix && <span className="opacity-50 text-2xl md:text-3xl ml-1">{suffix}</span>}
       </div>
       <div className="text-sm text-muted-foreground uppercase tracking-widest font-mono min-h-[1.5em]">

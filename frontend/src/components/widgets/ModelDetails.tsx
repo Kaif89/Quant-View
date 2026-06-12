@@ -45,8 +45,8 @@ export function ModelDetails() {
           <div className="h-px bg-border" />
           {[
             { label: 'Algorithm', value: 'Linear Regression' },
-            { label: 'MSE', value: mse.toFixed(4) },
-            { label: 'Coefficients', value: `[${coefficients.map(c => c.toFixed(4)).join(', ')}]` },
+            { label: 'MSE', value: (mse ?? 0).toFixed(4) },
+            { label: 'Coefficients', value: `[${(coefficients || []).map(c => (c ?? 0).toFixed(4)).join(', ')}]` },
             { label: 'Formula', value: `ŷ = ${coefficients[0]}·x + ${coefficients[1]}` },
           ].map(({ label, value }) => (
             <div key={label} className="flex justify-between items-center">
@@ -59,7 +59,7 @@ export function ModelDetails() {
             <div className="flex justify-between items-center p-3 rounded-xl bg-secondary border border-border">
               <span className="text-muted-foreground text-xs">T+1 Prediction</span>
               <span className="font-mono font-bold text-primary text-base">
-                ${predictedNext.toFixed(2)}
+                ${(predictedNext ?? 0).toFixed(2)}
               </span>
             </div>
           )}

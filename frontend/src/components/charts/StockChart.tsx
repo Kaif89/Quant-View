@@ -45,7 +45,7 @@ function CustomTooltip({ active, payload, label }: TooltipPayload) {
             <span className="w-2 h-2 rounded-full bg-[hsl(195_100%_52%)]" />
             Actual Close
           </span>
-          <span className="font-mono font-bold text-foreground">${actual.value.toFixed(2)}</span>
+          <span className="font-mono font-bold text-foreground">${(actual?.value ?? 0).toFixed(2)}</span>
         </div>
       )}
       {predicted && predicted.value != null && (
@@ -54,14 +54,14 @@ function CustomTooltip({ active, payload, label }: TooltipPayload) {
             <span className="w-2 h-2 rounded-full bg-[hsl(160_90%_45%)]" />
             Predicted
           </span>
-          <span className="font-mono font-bold" style={{ color: 'hsl(160 90% 45%)' }}>${predicted.value.toFixed(2)}</span>
+          <span className="font-mono font-bold" style={{ color: 'hsl(160 90% 45%)' }}>${(predicted?.value ?? 0).toFixed(2)}</span>
         </div>
       )}
       {actual && predicted && predicted.value != null && (
         <div className="flex justify-between gap-8 items-center border-t border-border pt-1.5">
           <span className="text-muted-foreground">Delta</span>
           <span className={`font-mono font-bold ${predicted.value >= actual.value ? 'stat-positive' : 'stat-negative'}`}>
-            {((predicted.value - actual.value) / actual.value * 100).toFixed(2)}%
+            {(((predicted?.value ?? 0) - (actual?.value ?? 1)) / (actual?.value ?? 1) * 100).toFixed(2)}%
           </span>
         </div>
       )}
@@ -142,7 +142,7 @@ export const StockChart = memo(function StockChart() {
             tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))', fontFamily: 'monospace' }}
             tickLine={false}
             axisLine={false}
-            tickFormatter={(v: number) => `$${v.toFixed(0)}`}
+            tickFormatter={(v: number) => `$${(v ?? 0).toFixed(0)}`}
             width={52}
           />
           <Tooltip 

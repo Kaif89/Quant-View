@@ -27,15 +27,15 @@ export const StockTable = memo(function StockTable() {
            {q.symbol}
            <span className="text-[9px] px-1 py-0.5 bg-secondary text-muted-foreground">{q.exchange}</span>
         </div>
-        <div className="w-[15%] p-3 font-mono text-foreground">{(q.currency==="INR" || q.exchange==="NSE") ? '₹' : '$'}{q.price.toFixed(2)}</div>
+        <div className="w-[15%] p-3 font-mono text-foreground">{(q.currency==="INR" || q.exchange==="NSE") ? '₹' : '$'}{(q.price ?? 0).toFixed(2)}</div>
         <div className={`w-[15%] p-3 font-mono ${isP ? 'text-green-500' : 'text-red-500'}`}>
-          {isP ? '+' : ''}{q.change.toFixed(2)}
+          {isP ? '+' : ''}{(q.change ?? 0).toFixed(2)}
         </div>
         <div className={`w-[15%] p-3 font-mono ${isP ? 'text-green-500' : 'text-red-500'}`}>
-          {isP ? '+' : ''}{q.changePercent.toFixed(2)}%
+          {isP ? '+' : ''}{(q.changePercent ?? 0).toFixed(2)}%
         </div>
-        <div className="w-[15%] p-3 font-mono text-muted-foreground">{q.dayHigh.toFixed(2)}</div>
-        <div className="w-[15%] p-3 font-mono text-muted-foreground">{q.dayLow.toFixed(2)}</div>
+        <div className="w-[15%] p-3 font-mono text-muted-foreground">{(q.dayHigh ?? 0).toFixed(2)}</div>
+        <div className="w-[15%] p-3 font-mono text-muted-foreground">{(q.dayLow ?? 0).toFixed(2)}</div>
         <div className="w-[10%] p-3 font-mono text-muted-foreground text-xs flex items-center justify-end">{q.volume}</div>
       </div>
     );
