@@ -81,7 +81,7 @@ export async function getAllTickers(): Promise<StockSeries[]> {
       'META', 'NVDA', 'NFLX',
       // Indian Market (NSE)
       'RELIANCE.NS', 'TCS.NS', 'INFY.NS', 'HDFCBANK.NS',
-      'ICICIBANK.NS', 'WIPRO.NS', 'SBIN.NS', 'TATAMOTORS.NS',
+      'ICICIBANK.NS', 'WIPRO.NS', 'SBIN.NS',
       'BHARTIARTL.NS', 'LT.NS',
     ];
 

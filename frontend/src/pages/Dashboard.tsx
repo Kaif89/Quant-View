@@ -37,8 +37,9 @@ function fmt(n: number | undefined | null, decimals = 2): string {
 }
 
 function pctChange(current: number, previous: number): number {
-  if (!previous) return 0;
-  return ((current - previous) / previous) * 100;
+  if (!previous || !current || isNaN(current) || isNaN(previous)) return 0;
+  const result = ((current - previous) / previous) * 100;
+  return isNaN(result) ? 0 : result;
 }
 
 function signalFromMomentum(delta: number): 'BUY' | 'SELL' | 'HOLD' {
@@ -164,9 +165,9 @@ function SignalRow({ ticker, name, signal, change, isLast, onClick }: SignalRowP
       <div className="flex items-center gap-3">
         <span className="text-xs font-mono tabular-nums"
           style={{
-            color: change >= 0 ? 'hsl(var(--kpi-positive))' : 'hsl(var(--kpi-negative))',
+            color: (change ?? 0) >= 0 ? 'hsl(var(--kpi-positive))' : 'hsl(var(--kpi-negative))',
           }}>
-          {change != null && change >= 0 ? '+' : ''}{change != null ? change.toFixed(2) : '0.00'}%
+          {(change ?? 0) >= 0 ? '+' : ''}{(change ?? 0).toFixed(2)}%
         </span>
         <span className={badgeClass}>{signal}</span>
       </div>
@@ -220,7 +221,7 @@ function FeatureImportanceBar({ name, value, maxValue }: { name: string; value: 
           }}
         />
       </div>
-      <span className="text-[10px] font-mono text-muted-foreground w-10 text-right">{(value * 100).toFixed(1)}%</span>
+      <span className="text-[10px] font-mono text-muted-foreground w-10 text-right">{((value ?? 0) * 100).toFixed(1)}%</span>
     </div>
   );
 }

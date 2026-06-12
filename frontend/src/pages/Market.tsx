@@ -20,8 +20,8 @@ export default function Market() {
           <div className="font-bold text-foreground">{quote.symbol}</div>
           <div className={`flex flex-col text-right`}
             style={{ color: positive ? 'hsl(var(--kpi-positive))' : 'hsl(var(--kpi-negative))' }}>
-            <span>{(quote.currency==="INR" || quote.exchange==="NSE") ? '₹' : '$'}{quote.price.toFixed(2)}</span>
-            <span className="text-xs">{positive ? '+' : ''}{quote.changePercent.toFixed(2)}%</span>
+            <span>{(quote.currency==="INR" || quote.exchange==="NSE") ? '₹' : '$'}{(quote.price ?? 0).toFixed(2)}</span>
+            <span className="text-xs">{positive ? '+' : ''}{(quote.changePercent ?? 0).toFixed(2)}%</span>
           </div>
         </div>
       )) : (
