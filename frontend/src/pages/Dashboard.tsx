@@ -316,14 +316,30 @@ export default function Dashboard() {
     return allStocks.map((s) => {
       const h = s.history;
       if (h.length < 2) return { ticker: s.meta.ticker, name: s.meta.name || s.meta.ticker, signal: 'HOLD' as const, change: 0 };
+      
       const last = h[h.length - 1].close;
       const prev = h[h.length - 2].close;
-      const change = pctChange(last, prev);
+      const actualChange = pctChange(last, prev); // Show 24h historical change in UI
+      
+      let signal: 'BUY' | 'SELL' | 'HOLD' = 'HOLD';
+      const predicted = s.model?.predictedNext;
+
+      if (predicted && predicted > 0) {
+        // AI Model Signal: based on T+1 prediction vs today's close
+        const predChange = pctChange(predicted, last);
+        if (predChange > 0.5) signal = 'BUY';
+        else if (predChange < -0.5) signal = 'SELL';
+        else signal = 'HOLD';
+      } else {
+        // Fallback Signal: based on momentum if ML model failed
+        signal = signalFromMomentum(actualChange);
+      }
+
       return {
         ticker: s.meta.ticker,
         name: s.meta.name || s.meta.ticker,
-        signal: signalFromMomentum(change),
-        change,
+        signal,
+        change: actualChange,
       };
     });
   }, [allStocks]);
