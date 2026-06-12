@@ -75,10 +75,18 @@ export async function getPrediction(ticker: string, token: string | null = null)
 
 /** Returns stock data for popular tickers (backend only) */
 export async function getAllTickers(): Promise<StockSeries[]> {
-    const popularTickers = ['AAPL', 'GOOGL', 'MSFT', 'AMZN', 'TSLA'];
+    const popularTickers = [
+      // US Market (NASDAQ/NYSE)
+      'AAPL', 'GOOGL', 'MSFT', 'AMZN', 'TSLA',
+      'META', 'NVDA', 'NFLX',
+      // Indian Market (NSE)
+      'RELIANCE.NS', 'TCS.NS', 'INFY.NS', 'HDFCBANK.NS',
+      'ICICIBANK.NS', 'WIPRO.NS', 'SBIN.NS', 'TATAMOTORS.NS',
+      'BHARTIARTL.NS', 'LT.NS',
+    ];
 
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 4000);
+    const timeout = setTimeout(() => controller.abort(), 8000);
 
     await fetch(`${API_BASE_URL}/api/health`, {
       signal: controller.signal,
