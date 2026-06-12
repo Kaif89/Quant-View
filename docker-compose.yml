@@ -3,8 +3,8 @@ version: '3.8'
 services:
   backend:
     build: 
-      context: ./backend
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: backend/Dockerfile
     ports:
       - "8080:8080"
     environment:
@@ -22,7 +22,7 @@ services:
 
   python-engine:
     build:
-      context: ./python-engine
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: python-engine/Dockerfile
     ports:
       - "5000:5000"
