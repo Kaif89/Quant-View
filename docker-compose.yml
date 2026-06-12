@@ -16,7 +16,8 @@ services:
       - SPRING_JPA_DATABASE_PLATFORM=org.hibernate.dialect.H2Dialect
       - SPRING_JPA_HIBERNATE_DDL_AUTO=update
       # Point the backend to the python engine container
-      - PYTHON_ENGINE_URL=http://python-engine:5000
+      - PYTHON_SERVICE_URL=http://python-engine:5000
+      - PYTHON_ML_URL=http://python-engine:5000
     depends_on:
       - python-engine
 
